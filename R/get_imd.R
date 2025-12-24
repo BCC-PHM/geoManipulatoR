@@ -35,7 +35,7 @@ fetch_data <- function(
   message("Processing Data...")
   # NOTE: you said you'll update column names later; leaving as-is for now.
   # process_data() must exist elsewhere in your package.
-  df <- process_data(df, aggregation, population)
+  #df <- process_data(df, aggregation, population)
   
   df
 }
