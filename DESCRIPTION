@@ -1,14 +1,21 @@
 Package: geoManipulatoR
 Type: Package
-Title: Geographic and IMD Aggregation Utilities
+Title: Geographic Lookups and IMD Aggregation Utilities
 Version: 0.0.1
 Authors@R: 
     person("Daniel", "Slater", role = c("aut", "cre"))
-Description: Tools to aggregate Index of Multiple Deprivation (IMD) scores
-    from LSOA level to higher geographies using population weighting.
+Description: Tools for geographic data manipulation and deprivation analysis.
+    Provides utilities to aggregate Index of Multiple Deprivation (IMD) scores
+    from LSOA level to higher geographies using population weighting, calculate
+    national ranks and deciles, and download postcode-level lookups from the
+    ONS Postcode Directory with optional enrichment of higher geographies and
+    IMD attributes.
 License: MIT
 Encoding: UTF-8
 LazyData: true
 Imports:
     dplyr,
-    rlang
+    rlang,
+    stringdist,
+    httr,
+    jsonlite
