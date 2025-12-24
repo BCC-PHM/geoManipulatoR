@@ -19,14 +19,12 @@ is essential.
 
 ## Installation
 
-This package is currently intended for local or internal use.
+### From GitHub
 
 ```r
-devtools::load_all()
-```
+# install.packages("devtools")
 
-```r
-library(geoManipulatoR)
+devtools::install_github("BCC-PHM/onsdecodeR")
 ```
 
 ---
@@ -42,12 +40,11 @@ to provide up-to-date postcode lookups.
 
 The package includes a bundled lookup dataset containing:
 
-- LSOA-level IMD scores
-- Population counts
-- Higher geography codes and names
+- LSOA-level IMD scores 2025
+- 2024 Population predictions from NOMIS
+- Higher geography codes and names from data.gov.uk
 
-All IMD aggregation is performed **locally** using this packaged dataset, ensuring
-results are reproducible and independent of external services.
+Where LSOA do not perfectly fit into higher geographies best-fit lookups were used.
 
 ---
 
