@@ -1,25 +1,114 @@
-# BCC sample project folder
+# geoManipulatoR
 
-This git repository contains a shell that should be used as the default structure for new projects
-in the analytical team.  It won't fit all circumstances perfectly, and you can make changes and issue a 
-pull request for new features / changes.
+`geoManipulatoR` is an R package for working with UK geographic data, with a focus on
+**Index of Multiple Deprivation (IMD)** analysis and **postcode-based geographic lookups**.
 
-The aim of this template is two-fold: firstly to give a common structure for analytical projects to aid
-reproducibility, secondly to allow for additional security settings as default to prevent accidental upload of files that should not be committed to Git and GitHub.
+It provides tools to:
 
-__Please update/replace this README file with one relevant to your project__
+- Aggregate IMD scores from **LSOA level to higher geographies** using population weighting
+- Calculate **national ranks and deciles** at each geography level
+- Download **postcode-level lookups** from the ONS Postcode Directory (ONSPD)
+- Enrich postcodes with **LSOA, MSOA, ward, constituency, and local authority codes**
+- Optionally attach **IMD scores and population data** to postcode-level data
 
-## To use this template, please use the following practises:
+The package is designed for **public health**, **local government**, and **health
+intelligence** workflows, where reproducible and consistent geography handling
+is essential.
 
-* Put any data files in the `data` folder.  This folder is explicitly named in the .gitignore file.  A further layer of security is that all xls, xlsx, csv and pdf files are also explicit ignored in the whole folder as well.  ___If you need to commit one of these files, you must use the `-f` (force) command in `commit`, but you must be sure there is no identifiable data.__
-* Save any documentation, images of support files in the `assets` folder.  This does not mean you should avoid commenting your code, but if you have an operating procedure or supporting documents, add them to this folder.
-* Please save all outputs: data, formatted tables, graphs etc. in the output folder.  This is also implicitly ignored by git, but you can use the `-f` (force) command in `commit` to add any you wish to publish to github.
+---
 
+## Installation
 
-### Please also consider the following:
-* Linting your code.  This is a formatting process that follows a rule set.  We broadly encourage the tidyverse standard, and recommend the `lintr` package.
-* Comment your code to make sure others can follow.
-* Consider your naming conventions: we recommend `snake case` where spaces are replaced by underscores and no capitals are use. E.g. `outpatient_referral_data`
+This package is currently intended for local or internal use.
 
+```r
+devtools::load_all()
+```
 
-This repository is dual licensed under the [Open Government v3]([https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/) & MIT. All code can outputs are subject to Crown Copyright.
+```r
+library(geoManipulatoR)
+```
+
+---
+
+## Data sources
+
+### ONS Postcode Directory (ONSPD)
+
+Postcode-level data are accessed via the **ONS Postcode Directory ArcGIS REST API**
+to provide up-to-date postcode lookups.
+
+### Packaged IMD lookup dataset
+
+The package includes a bundled lookup dataset containing:
+
+- LSOA-level IMD scores
+- Population counts
+- Higher geography codes and names
+
+All IMD aggregation is performed **locally** using this packaged dataset, ensuring
+results are reproducible and independent of external services.
+
+---
+
+## Core functions
+
+### get_imd()
+
+Aggregates IMD scores to a chosen geography level, calculates **national ranks and
+deciles**, and optionally filters to one or more Local Authorities.
+
+```r
+imd_lsoa <- get_imd()
+imd_bham <- get_imd("Birmingham")
+imd_bham_msoa <- get_imd("Birmingham", level = "MSOA21CD")
+```
+
+```r
+imd_bs <- get_imd(c("Birmingham", "Solihull"), level = "MSOA21CD")
+```
+
+Supported geography levels:
+
+- LSOA21CD (default)
+- MSOA21CD
+- WD25CD (wards)
+- PCON24CD (parliamentary constituencies)
+- LA24CD (local authorities)
+
+---
+
+### get_postcode_lookup()
+
+Downloads postcode-level data from the ONS Postcode Directory and optionally
+enriches it with higher geographies and IMD information.
+
+```r
+pc_lsoa <- get_postcode_lookup("Birmingham")
+pc_geogs <- get_postcode_lookup("Birmingham", add_geogs = TRUE)
+pc_imd <- get_postcode_lookup("Birmingham", add_geogs = TRUE, add_imd = TRUE)
+```
+
+---
+
+## Handling area names and codes
+
+Both core functions accept:
+
+- Local Authority names (e.g. "Birmingham", "Solihull")
+- Local Authority codes (e.g. "E08000025")
+
+Name matching uses **fuzzy matching** (Jaro–Winkler distance).
+
+---
+
+## Author
+
+Daniel Slater  
+Analysis & Data Visualisations Officer (Public Health)
+
+---
+
+## License
+
+MIT License
