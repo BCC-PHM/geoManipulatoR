@@ -24,7 +24,7 @@ is essential.
 ```r
 # install.packages("devtools")
 
-devtools::install_github("BCC-PHM/onsdecodeR")
+devtools::install_github("BCC-PHM/geoManipulatoR")
 ```
 
 ---
