@@ -78,12 +78,14 @@ Supported geography levels:
 ### get_postcode_lookup()
 
 Downloads postcode-level data from the ONS Postcode Directory and optionally
-enriches it with higher geographies and IMD/Population information from its LSOA.
+enriches it with higher geographies and IMD/Population information from its LSOA. Also has the functionality to return the LAT and LONG co-ordinates of the postcode centroids.
 
 ```r
 pc_lsoa <- get_postcode_lookup("Birmingham")
 pc_geogs <- get_postcode_lookup("Birmingham", add_geogs = TRUE)
 pc_imd <- get_postcode_lookup("Birmingham", add_geogs = TRUE, add_imd = TRUE)
+pc_latlon<- get_postcode_lookup("Birmingham", add_latlon = TRUE)
+
 ```
 
 ---
