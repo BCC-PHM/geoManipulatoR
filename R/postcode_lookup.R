@@ -3,6 +3,7 @@
 #' Downloads postcodes for the requested LA(s) from the ONSPD Live ArcGIS API and
 #' returns postcodes with LSOA codes. Optionally adds higher geographies from the API
 #' (MSOA/ward/PCON/LA etc) and/or IMD attributes by joining to the packaged IMD lookup.
+#' Optionally attaches longitude/latitude from the API (X/Y in WGS84).
 #'
 #' @param area Character vector of LA names or LA codes.
 #' @param postcode_field Postcode field to return from API. Default "PCDS".
@@ -10,11 +11,14 @@
 #' @param geogs Character vector of API geography fields to include when `add_geogs=TRUE`.
 #' @param add_imd Logical. If TRUE, joins IMD info from the packaged lookup by LSOA21CD.
 #' @param imd_cols Character vector of columns to bring across from the IMD lookup when `add_imd=TRUE`.
+#' @param add_latlon Logical. If TRUE, includes longitude/latitude columns from the API.
+#' @param lon_field API field name for longitude (default "LONG").
+#' @param lat_field API field name for latitude (default "LAT").
 #' @param verbose Logical; print progress.
 #' @param batch_size Integer; API page size.
 #' @param warn_threshold Numeric; fuzzy-match warning threshold for LA names.
 #'
-#' @return A tibble with postcode + LSOA, optionally with geographies and IMD columns.
+#' @return A tibble with postcode + LSOA, optionally with geographies, IMD columns, and LONG/LAT.
 #' @export
 get_postcode_lookup <- function(
     area,
@@ -23,6 +27,9 @@ get_postcode_lookup <- function(
     geogs = c("LSOA21CD", "MSOA21CD", "WD25CD", "PCON24CD", "LAD25CD"),
     add_imd = FALSE,
     imd_cols = c("IMDSCORE", "2024POP", "LA24CD", "LA24NM"),
+    add_latlon = FALSE,
+    lon_field = "LONG",
+    lat_field = "LAT",
     verbose = TRUE,
     batch_size = 2000,
     warn_threshold = 0.01
@@ -43,6 +50,9 @@ get_postcode_lookup <- function(
   if (isTRUE(add_geogs)) {
     api_fields <- unique(c(api_fields, geogs))
   }
+  if (isTRUE(add_latlon)) {
+    api_fields <- unique(c(api_fields, lon_field, lat_field))
+  }
   api_fields <- paste(api_fields, collapse = ",")
   
   url <- create_url(
@@ -58,6 +68,7 @@ get_postcode_lookup <- function(
   if (!postcode_field %in% names(pc)) {
     stop("API response did not contain the requested postcode field: ", postcode_field, call. = FALSE)
   }
+  
   pc <- pc |>
     dplyr::mutate(
       !!postcode_field := toupper(trimws(as.character(.data[[postcode_field]]))),
@@ -68,6 +79,25 @@ get_postcode_lookup <- function(
       !is.na(.data$LSOA21CD), nzchar(.data$LSOA21CD)
     ) |>
     dplyr::distinct(.data[[postcode_field]], .keep_all = TRUE)
+  
+  # If requested, normalise lat/lon to numeric and standard names (LONG/LAT)
+  if (isTRUE(add_latlon)) {
+    missing_ll <- setdiff(c(lon_field, lat_field), names(pc))
+    if (length(missing_ll) > 0) {
+      stop(
+        "API response missing longitude/latitude field(s): ",
+        paste(missing_ll, collapse = ", "),
+        call. = FALSE
+      )
+    }
+    
+    # Keep original field names but also create standard LONG/LAT (useful for joining/plotting)
+    pc <- pc |>
+      dplyr::mutate(
+        LONG = as.numeric(.data[[lon_field]]),
+        LAT  = as.numeric(.data[[lat_field]])
+      )
+  }
   
   # Optional: attach IMD columns (from packaged lookup) via LSOA21CD
   if (isTRUE(add_imd)) {
@@ -92,7 +122,7 @@ get_postcode_lookup <- function(
 #' Build an ArcGIS REST API query URL (ONSPD Live)
 #'
 #' @param la_codes Character vector of LA codes used in the API field LAD25CD
-#' @param out_fields Comma-separated string of fields to return (in addition to PCDS)
+#' @param out_fields Comma-separated string of fields to return (in addition to postcode_field)
 #' @param postcode_field Which postcode field to return ("PCDS" recommended; alternatively "PCD7"/"PCD8")
 #' @param return_geometry Logical; FALSE is faster (attributes only)
 #' @keywords internal
