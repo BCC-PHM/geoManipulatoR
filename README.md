@@ -19,14 +19,12 @@ is essential.
 
 ## Installation
 
-This package is currently intended for local or internal use.
+### From GitHub
 
 ```r
-devtools::load_all()
-```
+# install.packages("devtools")
 
-```r
-library(geoManipulatoR)
+devtools::install_github("BCC-PHM/geoManipulatoR")
 ```
 
 ---
@@ -42,12 +40,11 @@ to provide up-to-date postcode lookups.
 
 The package includes a bundled lookup dataset containing:
 
-- LSOA-level IMD scores
-- Population counts
-- Higher geography codes and names
+- LSOA-level IMD scores 2025
+- 2024 Population predictions from NOMIS
+- Higher geography codes and names from data.gov.uk
 
-All IMD aggregation is performed **locally** using this packaged dataset, ensuring
-results are reproducible and independent of external services.
+Where LSOA do not perfectly fit into higher geographies best-fit lookups were used.
 
 ---
 
@@ -81,12 +78,14 @@ Supported geography levels:
 ### get_postcode_lookup()
 
 Downloads postcode-level data from the ONS Postcode Directory and optionally
-enriches it with higher geographies and IMD information.
+enriches it with higher geographies and IMD/Population information from its LSOA. Also has the functionality to return the LAT and LONG co-ordinates of the postcode centroids.
 
 ```r
 pc_lsoa <- get_postcode_lookup("Birmingham")
 pc_geogs <- get_postcode_lookup("Birmingham", add_geogs = TRUE)
 pc_imd <- get_postcode_lookup("Birmingham", add_geogs = TRUE, add_imd = TRUE)
+pc_latlon<- get_postcode_lookup("Birmingham", add_latlon = TRUE)
+
 ```
 
 ---
