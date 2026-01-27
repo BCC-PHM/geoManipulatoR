@@ -19,7 +19,8 @@ get_imd <- function(
     level = "LSOA21CD",
     lookup = NULL,
     rank_desc = TRUE,
-    warn_threshold = 0.01
+    warn_threshold = 0.01,
+    raw = FALSE
 ) {
   filter_area <- !(is.null(area) || length(area) == 0 || all(!nzchar(as.character(area))))
   
@@ -49,6 +50,14 @@ get_imd <- function(
   # resolve LA names/codes to LA codes (if filtering)
   if (filter_area) {
     area_codes <- resolve_la_codes(area, lookup = df, warn_threshold = warn_threshold)
+  }
+  
+  # ---- RAW OPTION: return lookup as-is (optionally filtered) ----
+  if (isTRUE(raw)) {
+    if (filter_area) {
+      df <- dplyr::filter(df, .data$LA24CD %in% area_codes)
+    }
+    return(dplyr::as_tibble(df))
   }
   
   # ---- LSOA special case: no aggregation, just rank/decile on IMDSCORE ----
